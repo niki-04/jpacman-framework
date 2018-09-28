@@ -6,6 +6,7 @@ import nl.tudelft.jpacman.board.Direction;
 import nl.tudelft.jpacman.level.Level;
 import nl.tudelft.jpacman.level.Level.LevelObserver;
 import nl.tudelft.jpacman.level.Player;
+import nl.tudelft.jpacman.ui.PacManUiBuilder;
 
 /**
  * A basic implementation of a Pac-Man game.
@@ -101,4 +102,31 @@ public abstract class Game implements LevelObserver {
     public void levelLost() {
         stop();
     }
+    
+    /**
+     * Freezes the game.
+     */
+    
+    public void freeze() {
+    	synchronized (progressLock) {
+            if (!isInProgress()) {
+                return;
+            }
+            getLevel().freeze();
+        }
+    }
+    
+    /**
+     * Unfreezes the game.
+     */
+    
+    public void unfreeze() {
+    	synchronized (progressLock) {
+            if (!isInProgress()) {
+                return;
+            }
+            getLevel().unfreeze();
+        }
+    }
+   
 }

@@ -1,11 +1,16 @@
 package nl.tudelft.jpacman.level;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+
+import static org.mockito.Mockito.spy;
+
 import nl.tudelft.jpacman.board.Board;
 import nl.tudelft.jpacman.board.Square;
 import nl.tudelft.jpacman.npc.Ghost;
@@ -100,6 +105,77 @@ class LevelTest {
         level.stop();
         assertThat(level.isInProgress()).isFalse();
     }
+    
+    
+    //Newly Added Tests
+    
+    /**
+     * Validates the state of the level when the level is frozen before starting the game.
+     */
+    @Test
+    void freezeStart() {
+    	level.freeze();
+    	assertThat(level.isInProgress()).isFalse();
+    	level.start();
+    	assertThat(level.isInProgress()).isTrue();
+    }
+    
+    /**
+     * Validates the state of the level when the level is started and is frozen after.
+     */
+    @Test
+    void startFreeze() {
+    	level.start();
+    	assertThat(level.isInProgress()).isTrue();
+    	level.freeze();
+    	assertThat(level.isInProgress()).isTrue();
+    }
+    
+    /**
+     * Validates the state of the level when the level is started -> frozen -> unfrozen -> stopped.
+     */
+    @Test
+    void startFreezeUnFreezeStop() {
+    	level.start();
+    	assertThat(level.isInProgress()).isTrue();
+    	level.freeze();
+    	assertThat(level.isInProgress()).isTrue();
+    	level.unfreeze();
+    	assertThat(level.isInProgress()).isTrue();
+    	level.stop();
+    	assertThat(level.isInProgress()).isFalse();
+    }
+    
+    /**
+     * Validates the state of the level when the level is stopped -> frozen.
+     */
+    @Test
+    void stopFreeze() {
+    	level.start();
+    	assertThat(level.isInProgress()).isTrue();
+    	level.stop();
+    	assertThat(level.isInProgress()).isFalse();
+    	level.freeze();
+    	assertThat(level.isInProgress()).isFalse();
+    }
+    
+    /**
+     * Verifies NPC movement is stopped, when freeze button is clicked
+     */
+    
+    void freeze() {
+    	
+    	
+    }
+    
+    /**
+     * Verifies NPC movement is resumed, when freeze button is clicked again
+     */
+    void unfreeze() {
+    	
+    }
+    
+    
 
     /**
      * Verifies registering a player puts the player on the correct starting
@@ -154,4 +230,27 @@ class LevelTest {
         level.registerPlayer(p3);
         verify(p3).occupy(square1);
     }
+    
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void collidePlayerGhost() {
+    	Player p1 = mock(Player.class);
+    	Ghost g1 = mock(Ghost.class);
+    	DefaultPlayerInteractionMap collisionMap = mock(DefaultPlayerInteractionMap.class);
+    	collisionMap.collide(p1, g1);
+    	assertThat(p1.isAlive()).isFalse();
+    }
+    
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void collidePlayerPellet() {
+    	Player p1 = mock(Player.class);
+    	Pellet g1 = mock(Pellet.class);
+    	DefaultPlayerInteractionMap collisionMap = mock(DefaultPlayerInteractionMap.class);
+    	collisionMap.collide(p1, g1);
+    	//assertThat(p1.isAlive()).isTrue();
+    	assertEquals(p1.getScore(),g1.getValue());
+    }
+    
+    
 }

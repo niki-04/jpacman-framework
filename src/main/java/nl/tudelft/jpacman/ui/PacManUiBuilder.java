@@ -23,7 +23,17 @@ public class PacManUiBuilder {
      * Caption for the default start button.
      */
     private static final String START_CAPTION = "Start";
-
+    
+    /**
+     * Caption for the default freeze button.
+     */
+    private static final String FREEZE_CAPTION = "Freeze";
+    
+    /**
+     * Caption for the default unfreeze button.
+     */
+    private static final String UNFREEZE_CAPTION = "UnFreeze";
+    
     /**
      * Map of buttons and their actions.
      */
@@ -43,7 +53,10 @@ public class PacManUiBuilder {
      * Way to format the score.
      */
     private ScoreFormatter scoreFormatter = null;
+    
 
+
+    
     /**
      * Creates a new Pac-Man UI builder without any mapped keys or buttons.
      */
@@ -66,6 +79,7 @@ public class PacManUiBuilder {
         if (defaultButtons) {
             addStartButton(game);
             addStopButton(game);
+            addFreezeButton(game); 
         }
         return new PacManUI(game, buttons, keyMappings, scoreFormatter);
     }
@@ -95,6 +109,23 @@ public class PacManUiBuilder {
 
         buttons.put(START_CAPTION, game::start);
     }
+    
+    /**
+     * Adds a button with the caption {@value #FREEZE_CAPTION} that freezes the
+     * game when clicked once, and un-freezes the game when clicked again.
+     *
+     * @param game
+     *            The game to start.
+     */
+    private void addFreezeButton(final Game game) {
+        assert game != null;
+
+        buttons.put(FREEZE_CAPTION, game::freeze);
+        buttons.put(UNFREEZE_CAPTION, game::unfreeze); 
+        
+    }
+       
+    
 
     /**
      * Adds a key listener to the UI.
@@ -141,6 +172,7 @@ public class PacManUiBuilder {
         defaultButtons = true;
         buttons.put(START_CAPTION, null);
         buttons.put(STOP_CAPTION, null);
+        buttons.put(FREEZE_CAPTION, null);
         return this;
     }
 
@@ -156,4 +188,10 @@ public class PacManUiBuilder {
         this.scoreFormatter = scoreFormatter;
         return this;
     }
+    
+    public Map<String, Action> getButtons(){
+    	return this.buttons;
+    }
+    
+    
 }

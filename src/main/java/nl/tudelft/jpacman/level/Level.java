@@ -222,10 +222,39 @@ public class Level {
             inProgress = false;
         }
     }
+    
+    
+    /**
+     * Freezes this level, no longer allowing NPCs movement on the board
+     */
+    public void freeze() {
+    	synchronized (startStopLock) {
+            if (!isInProgress()) {
+                return;
+            }
+            stopNPCs();
+            updateObservers();
+        }
+    }
+    
 
+    /**
+     * Unfreezes this level, allowing NPCs movement on the board
+     */
+    public void unfreeze() {
+    	synchronized (startStopLock) {
+            if (!isInProgress()) {
+                return;
+            }
+            startNPCs();
+            updateObservers();
+        }
+    }
+    
     /**
      * Starts all NPC movement scheduling.
      */
+    //change to private
     private void startNPCs() {
         for (final Ghost npc : npcs.keySet()) {
             ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
