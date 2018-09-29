@@ -8,11 +8,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import static org.mockito.Mockito.spy;
 
 import nl.tudelft.jpacman.board.Board;
 import nl.tudelft.jpacman.board.Square;
+import nl.tudelft.jpacman.level.Level.LevelObserver;
 import nl.tudelft.jpacman.npc.Ghost;
 
 import com.google.common.collect.Lists;
@@ -57,6 +59,11 @@ class LevelTest {
      * The collision map.
      */
     private final CollisionMap collisions = mock(CollisionMap.class);
+    
+    /**
+     * The default interaction map.
+     */
+    private DefaultPlayerInteractionMap map;
 
     /**
      * Sets up the level with the default board, a single NPC and a starting
@@ -67,7 +74,9 @@ class LevelTest {
         final long defaultInterval = 100L;
         level = new Level(board, Lists.newArrayList(ghost), Lists.newArrayList(
             square1, square2), collisions);
+        map = new DefaultPlayerInteractionMap();
         when(ghost.getInterval()).thenReturn(defaultInterval);
+        
     }
 
     /**
@@ -106,77 +115,7 @@ class LevelTest {
         assertThat(level.isInProgress()).isFalse();
     }
     
-    
-    //Newly Added Tests
-    
-    /**
-     * Validates the state of the level when the level is frozen before starting the game.
-     */
-    @Test
-    void freezeStart() {
-    	level.freeze();
-    	assertThat(level.isInProgress()).isFalse();
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    }
-    
-    /**
-     * Validates the state of the level when the level is started and is frozen after.
-     */
-    @Test
-    void startFreeze() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isTrue();
-    }
-    
-    /**
-     * Validates the state of the level when the level is started -> frozen -> unfrozen -> stopped.
-     */
-    @Test
-    void startFreezeUnFreezeStop() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.unfreeze();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.stop();
-    	assertThat(level.isInProgress()).isFalse();
-    }
-    
-    /**
-     * Validates the state of the level when the level is stopped -> frozen.
-     */
-    @Test
-    void stopFreeze() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.stop();
-    	assertThat(level.isInProgress()).isFalse();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isFalse();
-    }
-    
-    /**
-     * Verifies NPC movement is stopped, when freeze button is clicked
-     */
-    
-    void freeze() {
-    	
-    	
-    }
-    
-    /**
-     * Verifies NPC movement is resumed, when freeze button is clicked again
-     */
-    void unfreeze() {
-    	
-    }
-    
-    
-
+   
     /**
      * Verifies registering a player puts the player on the correct starting
      * square.
@@ -231,24 +170,47 @@ class LevelTest {
         verify(p3).occupy(square1);
     }
     
+    //Testing DefaultInteractionMap by partions
+    
+    //Testing when player collides with ghost
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePlayerGhost() {
     	Player p1 = mock(Player.class);
     	Ghost g1 = mock(Ghost.class);
-    	DefaultPlayerInteractionMap collisionMap = mock(DefaultPlayerInteractionMap.class);
-    	collisionMap.collide(p1, g1);
+    	map.collide(p1, g1);
     	assertThat(p1.isAlive()).isFalse();
     }
     
+  //Testing when ghost collides with player
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void collideGhostPlayer() {
+    	Player p1 = mock(Player.class);
+    	Ghost g1 = mock(Ghost.class);
+    	map.collide(g1, p1);
+    	assertThat(p1.isAlive()).isFalse();
+    }
+    
+    
+    //Testing when player collides with pellet
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePlayerPellet() {
     	Player p1 = mock(Player.class);
     	Pellet g1 = mock(Pellet.class);
-    	DefaultPlayerInteractionMap collisionMap = mock(DefaultPlayerInteractionMap.class);
-    	collisionMap.collide(p1, g1);
-    	//assertThat(p1.isAlive()).isTrue();
+    	map.collide(p1, g1);
+    	assertEquals(p1.getScore(),g1.getValue());
+    	
+    }
+    
+    //Testing when pellet collides with player
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void collidePelletPlayer() {
+    	Player p1 = mock(Player.class);
+    	Pellet g1 = mock(Pellet.class);
+    	map.collide(g1, p1);
     	assertEquals(p1.getScore(),g1.getValue());
     }
     
