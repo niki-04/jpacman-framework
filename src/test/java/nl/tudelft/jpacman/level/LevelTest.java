@@ -75,12 +75,16 @@ class LevelTest {
      * Sets up the level with the default board, a single NPC and a starting
      * square.
      */
+    
+    private Launcher launcher;
+    
     @BeforeEach
     void setUp() {
         final long defaultInterval = 100L;
         level = new Level(board, Lists.newArrayList(ghost, ghost2), Lists.newArrayList(
             square1, square2), collisions);
         map = new DefaultPlayerInteractionMap();
+        launcher = new Launcher();
         when(ghost.getInterval()).thenReturn(defaultInterval);
         
     }
@@ -182,7 +186,8 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePlayerGhost() {
-    	Player p1 = mock(Player.class);
+    	Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
     	Ghost g1 = mock(Ghost.class);
     	map.collide(p1, g1);
     	assertThat(p1.isAlive()).isFalse();
@@ -192,7 +197,8 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collideGhostPlayer() {
-    	Player p1 = mock(Player.class);
+    	Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
     	Ghost g1 = mock(Ghost.class);
     	map.collide(g1, p1);
     	assertThat(p1.isAlive()).isFalse();
@@ -203,9 +209,11 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePlayerPellet() {
-    	Player p1 = mock(Player.class);
+    	Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
     	Pellet g1 = mock(Pellet.class);
     	map.collide(p1, g1);
+    	assertThat(p1.isAlive()).isTrue();
     	assertEquals(p1.getScore(),g1.getValue());
     	
     }
@@ -214,9 +222,11 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePelletPlayer() {
-    	Player p1 = mock(Player.class);
+    	Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
     	Pellet g1 = mock(Pellet.class);
     	map.collide(g1, p1);
+    	assertThat(p1.isAlive()).isTrue();
     	assertEquals(p1.getScore(),g1.getValue());
     }
 
@@ -224,14 +234,16 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collideGhostGhost() {
-        Player p1 = mock(Player.class);
-        p1.setAlive(true);
-        level.registerPlayer(p1);
+    	Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
         Ghost g1 = mock(Ghost.class);
         Ghost g2 = mock(Ghost.class);
+        
         //score of player before collide
         int oldScore = p1.getScore();
         map.collide(g1, g2);
+        assertThat(p1.isAlive()).isTrue();
+        
         //assert ghost collides have no effect on player's score
         assertEquals(oldScore, p1.getScore());
     }
@@ -242,11 +254,13 @@ class LevelTest {
     void collidePelletPellet() {
         Pellet pe1 = mock(Pellet.class);
         Pellet pe2 = mock(Pellet.class);
-        Player p1 = mock(Player.class);
-        level.registerPlayer(p1);
+        Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
+        
         //score of player before collide
         int oldScore = p1.getScore();
         map.collide(pe1, pe2);
+        assertThat(p1.isAlive()).isTrue();
         //assert pellet collides have no effect on player's score
         assertEquals(oldScore, p1.getScore());
 
@@ -256,13 +270,16 @@ class LevelTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collidePelletGhost() {
-        Player p1 = mock(Player.class);
-        Pellet pe1 = mock(Pellet.class);
+    	Pellet pe1 = mock(Pellet.class);
+        Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
         Ghost g1 = mock(Ghost.class);
-        level.registerPlayer(p1);
+        
         //score of player before collide
         int oldScore = p1.getScore();
         map.collide(pe1, g1);
+        assertThat(p1.isAlive()).isTrue();
+        
         //assert pellet collides with ghost have no effect on player's score
         assertEquals(oldScore, p1.getScore());
     }
@@ -272,13 +289,16 @@ class LevelTest {
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void collideGhostPellet() {
         Pellet pe1 = mock(Pellet.class);
-        Player p1 = mock(Player.class);
+        Game game = launcher.makeGame();
+        Player p1 = game.getPlayers().get(0);
         Ghost g1 = mock(Ghost.class);
-        level.registerPlayer(p1);
+        
         //score of player before collide
         int oldScore = p1.getScore();
+        
         map.collide(g1, pe1);
         assertThat(p1.isAlive()).isTrue();
+        
         //assert pellet collides with ghost have no effect on player's score
         assertEquals(oldScore, p1.getScore());
     }
