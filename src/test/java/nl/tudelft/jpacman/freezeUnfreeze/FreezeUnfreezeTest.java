@@ -9,6 +9,7 @@ import nl.tudelft.jpacman.board.Direction;
 import nl.tudelft.jpacman.board.Square;
 import nl.tudelft.jpacman.game.Game;
 import nl.tudelft.jpacman.level.CollisionMap;
+import nl.tudelft.jpacman.level.DefaultPlayerInteractionMap;
 import nl.tudelft.jpacman.level.Level;
 import nl.tudelft.jpacman.level.Player;
 import nl.tudelft.jpacman.npc.Ghost;
@@ -54,176 +55,205 @@ public class FreezeUnfreezeTest {
     private final CollisionMap collisions = mock(CollisionMap.class);
     
     
-	
 	/**
      * Launch the user interface.
      */
     @BeforeEach
     void setUpPacman() {
         launcher = new Launcher();
-        launcher.launch();
+    
         level = new Level(board, Lists.newArrayList(ghost), Lists.newArrayList(
                 square1, square2), collisions);
     }
     
+ 
+  //Decision Table Strategy Tests
+  
+  /**
+   * Validates the state of the game when: 
+   * Start Button is clicked -> Stop Button is clicked -> Freeze Button is clicked.
+   */
+  @Test
+  void startStopFreeze() {
+  	level.start();
+  	level.stop();
+  	level.freeze();
+  	assertThat(level.isInProgress()).isFalse();
+  }
+  
+  /**
+   * Validates the state of the game when: 
+   * Start Button is clicked -> Stop Button is clicked -> Freeze Button is clicked -> Freeze Button is clicked again.
+   */
+  @Test
+  void startStopFreezeUnfreeze() {
+  	level.start();
+  	level.stop();
+  	level.freeze();
+  	level.unfreeze();
+  	assertThat(level.isInProgress()).isFalse();
+  }
+  
+  /**
+   * Validates the state of the game when: 
+   * Start Button is clicked -> Freeze Button is clicked
+   */
+  @Test
+  void startFreeze() {
+  	level.start();
+  	assertThat(level.isInProgress()).isTrue();
+  	level.freeze();
+  	assertThat(level.isInProgress()).isTrue();
+  }
+  
+  /**
+   * Validates the state of the game when: 
+   * Start Button is clicked -> Freeze Button is clicked  -> Freeze Button is clicked again
+   */
+  @Test
+  void startFreezeUnfreeze() {
+  	level.start();
+  	level.freeze();
+  	level.unfreeze();
+  	assertThat(level.isInProgress()).isTrue();
+  }
+  
+  /**
+   * Validates the state of the game when: 
+   * Freeze Button is clicked  -> Freeze Button is clicked again, before game has started
+   */
+  @Test
+  void freezeUnfreeze() {
+  	level.freeze();
+  	level.unfreeze();
+  	assertThat(level.isInProgress()).isFalse();
+  }
+  
+  
+  /**
+   * Validates the state of the game when: 
+   * Stop Button is clicked -> Freeze Button is clicked, before game has started
+   */
+  @Test
+  void stopFreeze() {
+  	level.stop();
+  	level.freeze();
+  	assertThat(level.isInProgress()).isFalse();
+  }
+  
+  /**
+   * Validates the state of the game when: 
+   * Stop Button is clicked -> Freeze Button is clicked -> Freeze Button is clicked again, before game has started
+   */
+  @Test
+  void stopFreezeUnfreeze() {
+  	level.stop();
+  	level.freeze();
+  	level.unfreeze();
+  	assertThat(level.isInProgress()).isFalse();
+  }
+  
+    
+    //Functionality testing strategy tests;
+    
     /**
-     * Quit the user interface when we're done.
+     * Launch the game, and imitate what would happen in a typical game.
+     * Player starts a game, then freezes the game and moves 1 unit to the EAST and 2 units North
      */
-    @AfterEach
-    void tearDown() {
-        launcher.dispose();
+    @Test
+    void startFreezeMoveEastNorth() {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.EAST, 1);
+    	move(game, Direction.NORTH, 2);
+    	assertThat(player.getScore()).isEqualTo(30);
     }
     
     /**
      * Launch the game, and imitate what would happen in a typical game.
-     * The test is only a smoke test, and not a focused small test.
-     * Therefore it is OK that the method is a bit too long.
-     *
-     * @throws InterruptedException Since we're sleeping in this test.
-     */
-    @SuppressWarnings({"magicnumber", "methodlength", "PMD.JUnitTestContainsTooManyAsserts"})
-    @Test
-    void smokeTest() throws InterruptedException {
-        Game game = launcher.getGame();
-        Player player = game.getPlayers().get(0);
-
-        // start cleanly.
-        assertThat(game.isInProgress()).isFalse();
-        game.start();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isZero();
-        
-        // freeze the game cleanly.
-        game.freeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isZero();
-        
-        // unfreeze the game cleanly
-        game.unfreeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isZero();
-        
-        // stop the game
-        game.stop();
-        assertThat(game.isInProgress()).isFalse();
-        assertThat(player.getScore()).isZero();
-        
-        // start the game
-        game.start();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isZero();
-        
-        // freeze the game cleanly.
-        game.freeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isZero();
-        
-        
-        // move the player EAST once and get points
-        game.move(player, Direction.EAST);
-        assertThat(player.getScore()).isEqualTo(10);
-        
-        // move the player EAST again and get points
-        game.move(player, Direction.EAST);
-        assertThat(player.getScore()).isEqualTo(20);
-        
-        //unfreeze the game 
-        game.unfreeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isEqualTo(20);
-        
-        // move back WEST once, does not change the score
-        game.move(player, Direction.WEST);
-        assertThat(player.getScore()).isEqualTo(20);
-        
-        // freeze the game cleanly.
-        game.freeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isEqualTo(20);
-
-        // move the player far NORTH
-        move(game, Direction.NORTH, 2);
-        assertThat(player.getScore()).isEqualTo(40);
-        
-        game.unfreeze();
-        assertThat(game.isInProgress()).isTrue();
-        assertThat(player.getScore()).isEqualTo(40);
-        
-        Thread.sleep(500L);
-        
-        
-        game.stop();
-        assertThat(game.isInProgress()).isFalse();
-       
-    }
-    
-
-    /**
-     * Testing Transition states between Start/Stop and Freeze/Unfreeze.
-     */
-    /**
-     * Validates the state of the level when the level is frozen before starting the game.
+     * Player starts a game, then freezes the game and moves 6 units to the EAST and 2 units South
      */
     @Test
-    void freezeStart() {
-    	level.freeze();
-    	assertThat(level.isInProgress()).isFalse();
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
+    void startFreezeMoveEastSouth() {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.EAST, 6);
+    	move(game, Direction.SOUTH, 2);
+    	assertThat(player.getScore()).isEqualTo(80);
     }
     
     /**
-     * Validates the state of the level when the level is started and is frozen after.
+     * Launch the game, and imitate what would happen in a typical game.
+     * Players starts a game, then freezes the game and moves 1 unit to the WEST and 2 units North
      */
     @Test
-    void startFreeze() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isTrue();
+    void startFreezeMoveWestNorth() {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.WEST, 1);
+    	move(game, Direction.NORTH, 2);
+    	assertThat(player.getScore()).isEqualTo(30);
     }
     
     /**
-     * Validates the state of the level when the level is started -> frozen -> unfrozen -> stopped.
+     * Launch the game, and imitate what would happen in a typical game.
+     * Players starts a game, then freezes the game and moves 6 units to the WEST and 2 units South
      */
     @Test
-    void startFreezeUnFreezeStop() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.unfreeze();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.stop();
-    	assertThat(level.isInProgress()).isFalse();
+    void startFreezeMoveWestSouth() {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.WEST, 6);
+    	move(game, Direction.SOUTH, 2);
+    	assertThat(player.getScore()).isEqualTo(80);
     }
     
     /**
-     * Validates the state of the level when the level is stopped -> frozen.
+     * Launch the game, and imitate what would happen in a typical game.
+     * Players starts a game, then freezes the game and but does not move
      */
     @Test
-    void stopFreeze() {
-    	level.start();
-    	assertThat(level.isInProgress()).isTrue();
-    	level.stop();
-    	assertThat(level.isInProgress()).isFalse();
-    	level.freeze();
-    	assertThat(level.isInProgress()).isFalse();
+    void startFreezeNoMovement() {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.WEST, 0);
+    	assertThat(player.getScore()).isEqualTo(0);
     }
+    
     
     /**
-     * Validates the state of the level when the level is not started but frozen -> unfrozen is clicked.
+     * Launch the game, and imitate what would happen in a typical game.
+     * Players starts a game, then freezes the game and but does not move
+     * Player then unfreezes the game, and still does not move
+     * Player should get eaten by ghost
      */
     @Test
-    void freezeUnfreeze() {
-    	level.freeze();
-    	assertThat(level.isInProgress()).isFalse();
-    	level.unfreeze();
-    	assertThat(level.isInProgress()).isFalse();
+    void startFreezeNoMovementUnfreezeNoMovement() throws InterruptedException {
+    	Game game = launcher.makeGame();
+    	Player player = game.getPlayers().get(0);
+    	DefaultPlayerInteractionMap map = new DefaultPlayerInteractionMap();
+    	game.start();
+    	game.freeze();
+    	move(game, Direction.WEST, 0);
+    	assertThat(player.isAlive()).isTrue();
+    	
+    	game.unfreeze();
+    	move(game, Direction.EAST, 0);
+    	Thread.sleep(16000);
+    	
+    	assertThat(player.isAlive()).isFalse();
     }
-    
-    
-
+   
     /**
      * Make number of moves in given direction.
      *
