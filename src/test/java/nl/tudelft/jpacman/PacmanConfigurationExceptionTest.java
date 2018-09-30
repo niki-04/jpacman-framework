@@ -58,7 +58,6 @@ public class PacmanConfigurationExceptionTest {
         try {
             parser.parseMap(Lists.newArrayList("#####", "XXXXX", "#####"));
         } catch (PacmanConfigurationException exception){
-            System.out.println(exception);
             assertEquals("Invalid character at 0,1: X", exception.getMessage());
         }
     }
