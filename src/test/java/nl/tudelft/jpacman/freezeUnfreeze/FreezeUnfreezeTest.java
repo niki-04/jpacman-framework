@@ -1,58 +1,28 @@
 package nl.tudelft.jpacman.freezeUnfreeze;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import nl.tudelft.jpacman.Launcher;
-import nl.tudelft.jpacman.board.Board;
 import nl.tudelft.jpacman.board.Direction;
 import nl.tudelft.jpacman.board.Square;
 import nl.tudelft.jpacman.game.Game;
-import nl.tudelft.jpacman.level.CollisionMap;
-import nl.tudelft.jpacman.level.DefaultPlayerInteractionMap;
-import nl.tudelft.jpacman.level.Level;
 import nl.tudelft.jpacman.level.Player;
 import nl.tudelft.jpacman.npc.Ghost;
+import nl.tudelft.jpacman.npc.ghost.Navigation;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.google.common.collect.Lists;
 
 public class FreezeUnfreezeTest {
 	
 	private Launcher launcher;
 	
 	/**
-     * The level under test.
+     * The game under test.
      */
-    private Level level;
-    
-    /**
-     * An NPC on this level.
-     */
-    private final Ghost ghost = mock(Ghost.class);
-    
-    /**
-     * Starting position 1.
-     */
-    private final Square square1 = mock(Square.class);
-    
-    /**
-     * Starting position 2.
-     */
-    private final Square square2 = mock(Square.class);
-    
-    /**
-     * The board for this level.
-     */
-    private final Board board = mock(Board.class);
-    
-    /**
-     * The collision map.
-     */
-    private final CollisionMap collisions = mock(CollisionMap.class);
-    
+    private Game game;
     
 	/**
      * Launch the user interface.
@@ -60,9 +30,16 @@ public class FreezeUnfreezeTest {
     @BeforeEach
     void setUpPacman() {
         launcher = new Launcher();
-    
-        level = new Level(board, Lists.newArrayList(ghost), Lists.newArrayList(
-                square1, square2), collisions);
+        launcher.launch();
+        game = launcher.getGame();
+    }
+
+    /**
+     * Quit the user interface when we're done.
+     */
+    @AfterEach
+    void tearDown() {
+        launcher.dispose();
     }
     
  
@@ -74,10 +51,10 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void startStopFreeze() {
-  	level.start();
-  	level.stop();
-  	level.freeze();
-  	assertThat(level.isInProgress()).isFalse();
+  	game.start();
+  	game.stop();
+  	game.freeze();
+  	assertThat(game.isInProgress()).isFalse();
   }
   
   /**
@@ -86,11 +63,11 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void startStopFreezeUnfreeze() {
-  	level.start();
-  	level.stop();
-  	level.freeze();
-  	level.unfreeze();
-  	assertThat(level.isInProgress()).isFalse();
+  	game.start();
+  	game.stop();
+  	game.freeze();
+  	game.unfreeze();
+  	assertThat(game.isInProgress()).isFalse();
   }
   
   /**
@@ -99,10 +76,10 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void startFreeze() {
-  	level.start();
-  	assertThat(level.isInProgress()).isTrue();
-  	level.freeze();
-  	assertThat(level.isInProgress()).isTrue();
+  	game.start();
+  	assertThat(game.isInProgress()).isTrue();
+  	game.freeze();
+  	assertThat(game.isInProgress()).isTrue();
   }
   
   /**
@@ -111,10 +88,10 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void startFreezeUnfreeze() {
-  	level.start();
-  	level.freeze();
-  	level.unfreeze();
-  	assertThat(level.isInProgress()).isTrue();
+  	game.start();
+  	game.freeze();
+  	game.unfreeze();
+  	assertThat(game.isInProgress()).isTrue();
   }
   
   /**
@@ -123,9 +100,9 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void freezeUnfreeze() {
-  	level.freeze();
-  	level.unfreeze();
-  	assertThat(level.isInProgress()).isFalse();
+  	game.freeze();
+  	game.unfreeze();
+  	assertThat(game.isInProgress()).isFalse();
   }
   
   
@@ -135,9 +112,9 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void stopFreeze() {
-  	level.stop();
-  	level.freeze();
-  	assertThat(level.isInProgress()).isFalse();
+  	game.stop();
+  	game.freeze();
+  	assertThat(game.isInProgress()).isFalse();
   }
   
   /**
@@ -146,10 +123,10 @@ public class FreezeUnfreezeTest {
    */
   @Test
   void stopFreezeUnfreeze() {
-  	level.stop();
-  	level.freeze();
-  	level.unfreeze();
-  	assertThat(level.isInProgress()).isFalse();
+  	game.stop();
+  	game.freeze();
+  	game.unfreeze();
+  	assertThat(game.isInProgress()).isFalse();
   }
   
     
@@ -161,7 +138,6 @@ public class FreezeUnfreezeTest {
      */
     @Test
     void startFreezeMoveEastNorth() {
-    	Game game = launcher.makeGame();
     	Player player = game.getPlayers().get(0);
     	game.start();
     	game.freeze();
@@ -176,7 +152,6 @@ public class FreezeUnfreezeTest {
      */
     @Test
     void startFreezeMoveEastSouth() {
-    	Game game = launcher.makeGame();
     	Player player = game.getPlayers().get(0);
     	game.start();
     	game.freeze();
@@ -191,7 +166,6 @@ public class FreezeUnfreezeTest {
      */
     @Test
     void startFreezeMoveWestNorth() {
-    	Game game = launcher.makeGame();
     	Player player = game.getPlayers().get(0);
     	game.start();
     	game.freeze();
@@ -206,7 +180,6 @@ public class FreezeUnfreezeTest {
      */
     @Test
     void startFreezeMoveWestSouth() {
-    	Game game = launcher.makeGame();
     	Player player = game.getPlayers().get(0);
     	game.start();
     	game.freeze();
@@ -221,7 +194,6 @@ public class FreezeUnfreezeTest {
      */
     @Test
     void startFreezeNoMovement() {
-    	Game game = launcher.makeGame();
     	Player player = game.getPlayers().get(0);
     	game.start();
     	game.freeze();
@@ -232,27 +204,26 @@ public class FreezeUnfreezeTest {
     
     /**
      * Launch the game, and imitate what would happen in a typical game.
-     * Players starts a game, then freezes the game and but does not move
+     * Players starts a game, then freezes the game, but does not move
      * Player then unfreezes the game, and still does not move
-     * Player should get eaten by ghost
+     * The NPC's should not move when game is freezed, they should move
+     * when game is unfrezzed
      */
     @Test
-    void startFreezeNoMovementUnfreezeNoMovement() throws InterruptedException {
-    	Game game = launcher.makeGame();
-    	Player player = game.getPlayers().get(0);
-    	DefaultPlayerInteractionMap map = new DefaultPlayerInteractionMap();
-    	game.start();
-    	game.freeze();
-    	move(game, Direction.WEST, 0);
-    	assertThat(player.isAlive()).isTrue();
-    	
-    	game.unfreeze();
-    	move(game, Direction.EAST, 0);
-    	Thread.sleep(16000);
-    	
-    	assertThat(player.isAlive()).isFalse();
+    void startFreezeNoMovementUnfreezeMovement() throws InterruptedException {
+        game.start();
+        game.freeze();
+        Ghost ghost = Navigation.findUnitInBoard(Ghost.class, game.getLevel().getBoard());
+        Square ghostInitialLocation = ghost.getSquare();
+        Thread.sleep(3000);
+        Square ghostNewLocation = ghost.getSquare();
+        System.out.println(ghostNewLocation);
+        assertThat(ghostInitialLocation).isEqualTo(ghostNewLocation);
+        game.unfreeze();
+        Thread.sleep(3000);
+        Square ghostNewLocation2 = ghost.getSquare();
+        assertThat(ghostNewLocation).isNotEqualTo(ghostNewLocation2);
     }
-   
     /**
      * Make number of moves in given direction.
      *
