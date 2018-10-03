@@ -206,8 +206,8 @@ public class FreezeUnfreezeTest {
      * Launch the game, and imitate what would happen in a typical game.
      * Players starts a game, then freezes the game, but does not move
      * Player then unfreezes the game, and still does not move
-     * The NPC's should not move when game is freezed, they should move
-     * when game is unfrezzed
+     * The NPC's should not move when game is frozen, they should move
+     * when game is unfrozen
      */
     @Test
     void startFreezeNoMovementUnfreezeMovement() throws InterruptedException {
