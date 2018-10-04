@@ -243,12 +243,10 @@ public class FreezeUnfreezeTest {
             game.freeze();
             Ghost ghost = Navigation.findUnitInBoard(Ghost.class, game.getLevel().getBoard());
             Square ghostInitialLocation = ghost.getSquare();
-            move(game, Direction.WEST, 1);
             Thread.sleep(3000);
             Square ghostNewLocation = ghost.getSquare();
             assertThat(ghostInitialLocation).isEqualTo(ghostNewLocation);
             game.unfreeze();
-            move(game, Direction.SOUTH, 2);
             Thread.sleep(3000);
             Square ghostNewLocation2 = ghost.getSquare();
             assertThat(ghostNewLocation).isNotEqualTo(ghostNewLocation2);
